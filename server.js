@@ -1,31 +1,44 @@
 const express = require('express');
 const path = require('path');
-require('dotenv').config(); // .env ফাইল থেকে ভ্যারিয়েবল লোড করার জন্য
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// JSON বডি পার্স করার জন্য মিডলওয়্যার
 app.use(express.json());
-
-// স্ট্যাটিক ফাইল (যেমন index.html) পরিবেশন করার জন্য
 app.use(express.static(path.join(__dirname, '/')));
 
-// API অনুরোধ হ্যান্ডেল করার জন্য একটি নিরাপদ এন্ডপয়েন্ট
+// API এন্ডপয়েন্টটি এখন 'language' প্যারামিটারও গ্রহণ করবে
 app.post('/api/generate', async (req, res) => {
-    const { userPrompt } = req.body;
-    // Render-এর Environment Variable থেকে কী নেওয়া হবে
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
+    // এখন আমরা userPrompt এর সাথে language ও নিচ্ছি
+    const { userPrompt, language } = req.body;
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
     if (!GEMINI_API_KEY) {
         return res.status(500).json({ error: 'API key not configured on the server.' });
     }
-    if (!userPrompt) {
-        return res.status(400).json({ error: 'Prompt is required.' });
+    if (!userPrompt || !language) {
+        return res.status(400).json({ error: 'Prompt and language are required.' });
+    }
+
+    let fullPrompt;
+
+    // ব্যবহারকারীর পছন্দের ভাষার উপর ভিত্তি করে AI-কে নির্দেশ দেওয়া হচ্ছে
+    if (language === 'python') {
+        fullPrompt = `You are an expert Python developer. Your task is to generate a complete, runnable Python script based on the user's request. 
+        The script should be well-commented to explain the logic. 
+        Do not include any explanations or markdown formatting like \`\`\`python. 
+        The output must be ONLY the raw Python code itself.
+        User Request: "${userPrompt}"`;
+    } else { // ডিফল্ট 'web' এর জন্য
+        fullPrompt = `You are an expert web developer. Your task is to generate a complete, self-contained HTML file based on the user's request. 
+        The file must include all necessary HTML, CSS (inside a <style> tag), and JavaScript (inside a <script> tag). 
+        Do not include any explanations or markdown formatting like \`\`\`html. 
+        The output must be ONLY the raw HTML code itself, starting with <!DOCTYPE html>.
+        User Request: "${userPrompt}"`;
     }
 
     const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
-    const fullPrompt = `You are an expert web developer. Your task is to generate a complete, self-contained HTML file based on the user's request. The file must include all necessary HTML, CSS (inside a <style> tag), and JavaScript (inside a <script> tag). Do not include any explanations, comments, or markdown formatting like \`\`\`html. The output must be ONLY the raw HTML code itself, starting with <!DOCTYPE html>. User Request: "${userPrompt}"`;
 
     try {
         const geminiResponse = await fetch(`${API_URL}?key=${GEMINI_API_KEY}`, {
@@ -49,7 +62,6 @@ app.post('/api/generate', async (req, res) => {
     }
 });
 
-// সার্ভার চালু করার জন্য
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
