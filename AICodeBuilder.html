@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MrDevilEx Ai Code Builder</title>
+    <style>
+        /* Define color variables based on the new palette */
+        :root {
+            --bg-color: #F0F4F8; /* CHANGED: Light Blue-Gray */
+            --container-bg: #8697C4; /* Periwinkle Gray */
+            --input-bg: #FFFFFF; /* White for better contrast */
+            --text-primary: #1F2937; /* Dark Gray for readability */
+            --text-secondary: #3D52A0; /* Midnight Blue for subtext */
+            --accent-color: #3D52A0; /* Midnight Blue */
+            --accent-color-hover: #7091E6; /* Sky Blue */
+            --border-color: #ADB8DA; /* Soft Lavender */
+            --shadow-color: rgba(61, 82, 160, 0.15);
+            --header-bg: #3D52A0; /* Midnight Blue */
+            --header-text: #FFFFFF;
+        }
+
+        /* General styles and resets */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Main app container */
+        .app-wrapper {
+            flex-grow: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--header-bg);
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--header-text);
+        }
+        
+        header nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        header nav a {
+            text-decoration: none;
+            color: var(--header-text);
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+        
+        header nav a:hover {
+            opacity: 0.8;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        .hero-section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        .hero-section p {
+            font-size: 1.125rem;
+            max-width: 700px;
+            margin: 0 auto;
+            color: var(--text-secondary);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .prompt-container {
+            background-color: var(--container-bg);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        #prompt-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            resize: vertical;
+            min-height: 80px;
+            transition: all 0.3s ease;
+        }
+        #prompt-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 20%, transparent);
+        }
+        #prompt-input::placeholder {
+            color: color-mix(in srgb, var(--text-secondary) 80%, white);
+        }
+
+        #generate-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #generate-btn:hover {
+            background-color: var(--accent-color-hover);
+        }
+        #generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Code and Preview Panels */
+        .output-panels {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .output-panels {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--container-bg);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+            transition: all 0.3s ease;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: color-mix(in srgb, var(--container-bg) 90%, black);
+        }
+
+        .panel-title {
+            font-weight: 600;
+            color: var(--bg-color);
+        }
+
+        #copy-btn {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: 1px solid var(--accent-color-hover);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        #copy-btn:hover {
+            background-color: var(--accent-color-hover);
+        }
+
+        .code-container {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            background-color: color-mix(in srgb, #2d333b 95%, var(--container-bg)); /* Darker code bg */
+            color: #c9d1d9; /* Lighter text for dark bg */
+        }
+
+        .code-container pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        #preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            flex-grow: 1;
+            background-color: #FFFFFF;
+        }
+        
+        .loader {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #FFF;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            background-color: var(--bg-color);
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="logo">Ai Code Builder</div>
+            <nav>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Features</a></li>
+                    <li><a href="#">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="app-wrapper">
+        <main>
+            <div class="hero-section">
+                <h2>Ai Code Builder: Turn Your Ideas into Code, Instantly.</h2>
+                <p>Describe your web component in plain language, and let our advanced AI write the HTML, CSS, and JavaScript, python for you. The future of web development is here.</p>
+                
+                <!-- AD CODE START: Banner Ad -->
+                <div class="ad-container" style="margin-top: 2rem; text-align: center;">
+                    <script type="text/javascript">
+                        atOptions = {
+                            'key' : '2bfc42701cabc9e1c55ab27ea22f27a4',
+                            'format' : 'iframe',
+                            'height' : 60,
+                            'width' : 468,
+                            'params' : {}
+                        };
+                    </script>
+                    <script type="text/javascript" src="//www.highperformanceformat.com/2bfc42701cabc9e1c55ab27ea22f27a4/invoke.js"></script>
+                </div>
+                <!-- AD CODE END -->
+            </div>
+
+            <div class="main-content">
+                <div class="prompt-container">
+                    <textarea id="prompt-input" placeholder="Create a responsive pricing table with three tiers: Basic, Pro, and Enterprise. The Pro plan should be highlighted.'"></textarea>
+                    <button id="generate-btn">Generate Code</button>
+                </div>
+
+                <div class="output-panels">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="panel-title">Code Editor</span>
+                            <button id="copy-btn">Copy</button>
+                        </div>
+                        <div class="code-container">
+                            <pre><code id="code-output">// Your generated code will appear here...</code></pre>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="panel-title">Live Preview</span>
+                        </div>
+                        <iframe id="preview-iframe" title="Live Preview"></iframe>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <!-- AD CODE START: Footer Ad -->
+        <div class="ad-container-footer" style="margin-bottom: 1.5rem; text-align: center;">
+            <script async="async" data-cfasync="false" src="//pl27471389.profitableratecpm.com/f2e7cbab76b1c25ea8fc21116e109f64/invoke.js"></script>
+            <div id="container-f2e7cbab76b1c25ea8fc21116e109f64"></div>
+        </div>
+        <!-- AD CODE END -->
+        
+        <p>&copy; 2024 MrDevilEx . All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Element References ---
+            const generateBtn = document.getElementById('generate-btn');
+            const promptInput = document.getElementById('prompt-input');
+            const codeOutput = document.getElementById('code-output');
+            const previewIframe = document.getElementById('preview-iframe');
+            const copyBtn = document.getElementById('copy-btn');
+            
+            // --- API Call and Code Generation ---
+            const API_KEY = "AIzaSyC2nQSjHpE6U_eLynQICtbMcZKVBoStDuA"; // IMPORTANT: Replace with your actual Google AI API Key
+            const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
+            
+            let typewriterInterval;
+
+            generateBtn.addEventListener('click', async () => {
+                const userPrompt = promptInput.value.trim();
+                if (!userPrompt) {
+                    alert('Please enter a description for the component.');
+                    return;
+                }
+                
+                if (API_KEY === "AIzaSyBhwffuawWX01eRJA5X_D9vpE7llZpIsVY") { // A simple check if the key is still the placeholder
+                    alert("Important: Please replace the placeholder API_KEY in the script with your own Google AI API key for this tool to work.");
+                    // We can still proceed for demonstration, but a real app would block this.
+                }
+
+                // Reset state and show loading indicator
+                setLoading(true);
+                codeOutput.textContent = '';
+                previewIframe.srcdoc = '<!-- Preview will be rendered here -->';
+                if (typewriterInterval) clearInterval(typewriterInterval);
+
+                const fullPrompt = `
+                    You are an expert web developer. Your task is to generate a complete, self-contained HTML file based on the user's request.
+                    The file must include all necessary HTML, CSS (inside a <style> tag), and JavaScript (inside a <script> tag).
+                    Do not include any explanations, comments, or markdown formatting outside of the code itself.
+                    The output must be a single, valid HTML code block.
+
+                    User Request: "${userPrompt}"
+                `;
+
+                try {
+                    const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: fullPrompt }]
+                            }]
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API Error: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`);
+                    }
+
+                    const data = await response.json();
+                    const rawCode = data.candidates[0].content.parts[0].text;
+                    
+                    // Clean the response to get only the code
+                    const cleanedCode = extractHtmlCode(rawCode);
+                    
+                    if (cleanedCode) {
+                        startTypewriter(cleanedCode);
+                    } else {
+                        codeOutput.textContent = "Error: Could not extract valid HTML code from the AI's response. Please try again.";
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching from API:', error);
+                    codeOutput.textContent = `An error occurred: ${error.message}. Check the console for details.`;
+                } finally {
+                    setLoading(false);
+                }
+            });
+
+            function extractHtmlCode(rawText) {
+                // Find the first ```html and the last ```
+                const match = rawText.match(/```html\s*([\s\S]*?)\s*```/);
+                if (match && match[1]) {
+                    return match[1].trim();
+                }
+                // Fallback for responses that might not include the language identifier
+                const fallbackMatch = rawText.match(/```\s*([\s\S]*?)\s*```/);
+                if (fallbackMatch && fallbackMatch[1]) {
+                    return fallbackMatch[1].trim();
+                }
+                // If no markdown block is found, assume the whole text is code
+                return rawText.trim();
+            }
+
+            function startTypewriter(text) {
+                let i = 0;
+                codeOutput.textContent = ''; // Clear previous content
+                typewriterInterval = setInterval(() => {
+                    if (i < text.length) {
+                        codeOutput.textContent += text.charAt(i);
+                        i++;
+                    } else {
+                        clearInterval(typewriterInterval);
+                        updatePreview();
+                    }
+                }, 10); // Adjust typing speed here (milliseconds)
+            }
+
+            function updatePreview() {
+                const fullCode = codeOutput.textContent;
+                previewIframe.srcdoc = fullCode;
+            }
+
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    generateBtn.disabled = true;
+                    generateBtn.innerHTML = '<span class="loader"></span>Generating...';
+                } else {
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = 'Generate Code';
+                }
+            }
+            
+            // --- Copy to Clipboard ---
+            copyBtn.addEventListener('click', () => {
+                const codeToCopy = codeOutput.textContent;
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(codeToCopy).then(() => {
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyBtn.textContent = 'Copy';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        alert('Failed to copy code.');
+                    });
+                } else {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = codeToCopy;
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyBtn.textContent = 'Copy';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Fallback copy failed: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
